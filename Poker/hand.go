@@ -64,10 +64,10 @@ func outputHand(hand []*card) ([]*card, bool, int){
 
 func judgeHand(hand []*card, ok_royalst bool) (int, int, int) {
 
-	var check = make([]int, 13)
+	var check = make([]int, 14)	//!!!!!!!!!!! 13にしてたせいでc.number == 13のときバグ発生
 
 	for _, c := range hand {
-		check[c.number]++
+		check[c.number]++	//????????????アクセスしてint型を表示しているのになんの問題？
 	}
 
 	//sort.Ints(check)だけで添字を逆順にしても良い
@@ -82,20 +82,20 @@ func judgeHand(hand []*card, ok_royalst bool) (int, int, int) {
 	var bit int
 	switch max {
 	case 4:
-		bit |= (1<<2)	//フォーカード
+		bit |= 0b100//(1<<2)	//フォーカード
 
 	case 3:
-		bit |= (1<<6)	//スリーカード
+		bit |= 0b1000000//(1<<6)	//スリーカード
 
 		if nmax == 2 {
-			bit |= (1<<3)	//フルハウス
+			bit |= 0b1000//(1<<3)	//フルハウス
 		}
 
 	case 2:
-		bit |= (1<<8)	//ワンペア
+		bit |= 0b100000000//(1<<8)	//ワンペア
 
 		if nmax== 2 {
-			bit |= (1<<7)	//ツーペア
+			bit |= 0b10000000//(1<<7)	//ツーペア
 		}
 
 	}
@@ -104,7 +104,7 @@ func judgeHand(hand []*card, ok_royalst bool) (int, int, int) {
 	var ok_flash, ok_straight = true, true
 	var countFla, countStr int
 	for i := 0; i+1 < 5; i++ {
-		if hand[i].suit != hand[i+1].suit {
+		if *(hand[i].suit) != *(hand[i+1].suit) {	//hand[i]もポインタだがhand[i]経由でsuit *stringにアクセスしている.
 			ok_flash = false
 		}else{
 			countFla++
@@ -119,16 +119,16 @@ func judgeHand(hand []*card, ok_royalst bool) (int, int, int) {
 	
 	switch {
 	case ok_flash:
-		bit |= (1<<4)	//フラッシュ
+		bit |= 0b10000//(1<<4)	//フラッシュ
 	
 	case ok_straight:
-		bit |= (1<<5)	//ストレート
+		bit |= 0b100000//(1<<5)	//ストレート
 	
 	case ok_flash && ok_straight:
-		bit |= (1<<1)	//ストフラ
+		bit |= 0b10//(1<<1)	//ストフラ
 
 	case ok_flash && ok_royalst:
-		bit |= (1<<0)	//ロイヤルストフラ
+		bit |= 0b1//(1<<0)	//ロイヤルストフラ
 	}
 
 	return bit, countFla, countStr
@@ -160,23 +160,57 @@ func outputRole(bit int, roles *[]string) {
 */
 
 func selfChange(hand []*card, cards []*card) ([]*card, []*card, int) {
-	print("入れ替えたいカードの番号を選んで下さい, 0を押したら交換終了です. > ")
-
+	var memory = make([]bool, 5)	// handがポインタ型だったらこれをやっても無駄.newhandが書き換えられたらhandも書き換えられる.
+	print("入れ替えたいカードの番号を選んで下さい, 0を押したら交換終了, 6を押したら変更をもとに戻します. > ")
+	
 	for {
 		var n int
 		fmt.Scan(&n)
-
-		if n == 0 {
-			println("交換しました.")
-			return hand, cards, 5-len(hand)
+		for n < 0 || n > 6 {
+			println("0~6の番号を入力して下さい.")
+			fmt.Scan(&n)
 		}
 
-		cards  = append(cards, hand[n-1])
+			switch {
+				case n >= 1 && n <= 5:
+					memory[n-1] = true
+					fmt.Printf("%d番目のカードを交換しました.\n", n)
+				
+				case n == 0:
+					var witch string
+					fmt.Printf("交換を終わりますか？ [yes/no (y/n)] > ")
+					fmt.Scan(&witch)
+					
+					switch witch{
+						case "yes", "y":
+							for i, ok := range memory{
+								if ok {
+									cards  = append(cards, hand[i])
+								
+									/*"golang.org/x/exp/slices"パッケージを使う場合
+									hand = slices.Delete(hand, n-1, n)
+									*/
+									hand = append(hand[:i], hand[i:]...)//!!!! ...が重要									
+								}
+							}
+							return hand, cards, 5-len(hand)
+						case "no","n":
+							println("続けます.")
+					}
 
-		/*"golang.org/x/exp/slices"パッケージを使う場合
-		hand = slices.Delete(hand, n-1, n)
-		*/
-		hand = append(hand[:(n-1)], hand[n:]...)//!!!! ...が重要
+				case n == 6:
+					var witch string
+					fmt.Printf("交換をもとに戻しますか？ [yes/no (y/n)] > ")
+					fmt.Scan(&witch)
+
+					switch witch{
+					case "yes", "y":
+						memory = make([]bool,5)
+					case "no","n":
+						println("続けます.")
+					}
+			}
+
 	}
 }
 //C
