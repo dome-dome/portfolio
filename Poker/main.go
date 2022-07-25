@@ -15,30 +15,38 @@ var roles = &([]string{
 var suit0, suit1, suit2, suit3 string = "♠", "♣", "◆", "♥"
 var suits = &([]*string{&suit0, &suit1, &suit2, &suit3})	//煩雑だがcard型の定義を満たすためにsuit0~3はポインタ型にする
 
-var cs = make([]*card, 0, 53)
+var cards = make([]*card, 0, 53)
 
 
 func main() {
 	
 	for _, suit := range *suits {
 		for i := 1; i <= 13; i++ {
-			cs = append(cs, &(card{	//&(値)　と同じ
+			cards = append(cards, &(card{	//&(値)　と同じ
 				suit : suit,
 				number : i,
 			}))
 		}
 	}
 
-var n int
+var n int = 5
 for i := 0; i < 3; i++ {
-	hand, cards := drawHand(cs, 5)
+	hand, cards := drawHand(cards, n)
 
-	hand, ok_royalst, countRoyal := outputHand(hand)
+	hand, ok_royalst, countRoyalst := outputHand(hand)
 
 	bit, countFla, countStr := judgeHand(hand, ok_royalst)
 
 	outputRole(bit, roles)
 
-	hand, cards, n = change(hand, cards)
+	switch {
+	case countRoyalst == 4 && countFla == 4:
+		println("1枚交換すればロイヤルストレートフラッシュになるかも？")
+	case countStr == 4:
+		println("1枚交換すればストレートになるかも？")
+	case countFla == 4:
+		println("1枚交換すればフラッシュになるかも？")
+	}
+	hand, cards, n = selfChange(hand, cards)
 }
 }

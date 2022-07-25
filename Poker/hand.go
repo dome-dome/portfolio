@@ -5,6 +5,7 @@ import (
 	"time"
 	"sort"
 	"fmt"
+	//"golang.org/x/exp/slices"
 )
 
 type card struct{
@@ -13,7 +14,7 @@ type card struct{
 }
 
 func drawHand(cards []*card, n int) ([]*card, []*card) {
-	rand.Seed(time.Now().Unixnano())
+	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(cards), func(i, j int) {cards[i], cards[j] = cards[j], cards[i]})
 	
 	hand := cards[:n]
@@ -27,34 +28,35 @@ func drawHand(cards []*card, n int) ([]*card, []*card) {
 //手札をn枚引き, 山札を決める
 
 func outputHand(hand []*card) ([]*card, bool, int){
+	//ユーザ定義型のスライスなのでslices.Sort(hand)はできない
 	sort.Slice(hand, func(i, j int) bool{return hand[i].number < hand[j].number})
 	
 	var ok_royalst bool = true
-	var countRoyal int
+	var countRoyalst int
 	for i, c := range hand {
 		switch c.number{
 		case 1:
-			countRoyal++
-			fmt.Printf("%d. %s A\n", i+1, c.suit)
+			countRoyalst++
+			fmt.Printf("%d. %s A\n", i+1, *(c.suit))	////!!!!!!!
 		case 10:
-			countRoyal++
-			fmt.Printf("%d. %s 10\n", i+1, c.suit)
+			countRoyalst++
+			fmt.Printf("%d. %s 10\n", i+1, *(c.suit))
 		case 11:
-			countRoyal++
-			fmt.Printf("%d. %s J\n", i+1, c.suit)
+			countRoyalst++
+			fmt.Printf("%d. %s J\n", i+1, *(c.suit))
 		case 12:
-			countRoyal++
-			fmt.Printf("%d. %s Q\n", i+1, c.suit)
+			countRoyalst++
+			fmt.Printf("%d. %s Q\n", i+1, *(c.suit))
 		case 13:
-			countRoyal++
-			fmt.Printf("%d. %s K\n", i+1, c.suit)
+			countRoyalst++
+			fmt.Printf("%d. %s K\n", i+1, *(c.suit))
 		default:
-			fmt.Printf("%d. %s %d\n", i+1, c.suit, c.number)
+			fmt.Printf("%d. %s %d\n", i+1, *(c.suit), c.number)
 			ok_royalst = false
 		}
 	}
 
-	return hand, ok_royalst, countRoyal
+	return hand, ok_royalst, countRoyalst
 }
 //A
 //手札のソート
@@ -68,9 +70,15 @@ func judgeHand(hand []*card, ok_royalst bool) (int, int, int) {
 		check[c.number]++
 	}
 
-	sort.Sort(sort.Reverse(sort.IntSlice(check)))	//checkを逆順ソート
+	//sort.Ints(check)だけで添字を逆順にしても良い
+	sort.Sort(sort.Reverse(sort.IntSlice(check)))	
+	/* sortパッケージを使わないでcheckを逆順ソート
+	for left, right := 0, len(check)-1; left < right; left, right = left+1, right-1 {
+		check[left], check[right] = check[right], check[left]
+	}
+	*/
 
-	max := check[0]
+	max, nmax := check[0], check[1]
 	var bit int
 	switch max {
 	case 4:
@@ -79,14 +87,14 @@ func judgeHand(hand []*card, ok_royalst bool) (int, int, int) {
 	case 3:
 		bit |= (1<<6)	//スリーカード
 
-		if check[1] == 2 {
+		if nmax == 2 {
 			bit |= (1<<3)	//フルハウス
 		}
 
 	case 2:
 		bit |= (1<<8)	//ワンペア
 
-		if check[1] == 2 {
+		if nmax== 2 {
 			bit |= (1<<7)	//ツーペア
 		}
 
@@ -151,23 +159,25 @@ func outputRole(bit int, roles *[]string) {
 9.ワンペア100000000
 */
 
-func autoChange(hand []*card, cards []*card) ([]*card, []*card, int) {
-	print("入れ替えたいカードの番号を選んで下さい, 0を押したら交換終了です > ")
+func selfChange(hand []*card, cards []*card) ([]*card, []*card, int) {
+	print("入れ替えたいカードの番号を選んで下さい, 0を押したら交換終了です. > ")
 
 	for {
 		var n int
 		fmt.Scan(&n)
 
 		if n == 0 {
-			return
+			println("交換しました.")
+			return hand, cards, 5-len(hand)
 		}
 
 		cards  = append(cards, hand[n-1])
-		hand = append(hand[:(n-1)], hand[n:])
-	}
-	println()
 
-	return hand, cards, len(hand)
+		/*"golang.org/x/exp/slices"パッケージを使う場合
+		hand = slices.Delete(hand, n-1, n)
+		*/
+		hand = append(hand[:(n-1)], hand[n:]...)//!!!! ...が重要
+	}
 }
 //C
 //self change
