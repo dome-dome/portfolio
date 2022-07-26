@@ -40,11 +40,13 @@ func main() {
 	cards = cards[5:]
 
 	for i := 0; i < 3; i++ {
-		hand, cards = drawHand(cards, hand)
+		*hand, *cards = drawHand(*cards, *hand)
 
-		hand, ok_royalst, countRoyalst := outputHand(hand)
+		var ok_royalst bool = true
+		var countRoyalst int
+		*hand, &ok_royalst, &countRoyalst = outputHand(*hand, &ok_royalst, &countRoyalst)
 
-		bit, countFla, countStr := judgeHand(hand, ok_royalst)
+		bit, countFla, countStr := judgeHand(*hand, &ok_royalst)
 
 		outputRole(bit, roles)
 
@@ -57,6 +59,6 @@ func main() {
 			println("1枚交換すればフラッシュになるかも？")
 		}
 		fmt.Printf("%d回目の交換\n", i+1)
-		hand, cards = selfChange(hand, cards)
+		*hand, *cards = selfChange(*hand, *cards)
 	}
 }
