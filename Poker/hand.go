@@ -13,13 +13,16 @@ type card struct{
 	number int
 }
 
-func drawHand(cards []*card, n int) ([]*card, []*card) {
+func drawHand(cards []*card, hand []*card, n int) ([]*card, []*card) {
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(cards), func(i, j int) {cards[i], cards[j] = cards[j], cards[i]})
 	
-	hand := cards[:n]
+	drawcards := cards[:n]
 	cards = cards[n:]
 
+	for _, c := range drawcards{
+		hand = append(hand, c)
+	}
 	return hand, cards
 }
 //S
@@ -159,7 +162,7 @@ func outputRole(bit int, roles *[]string) {
 9.ワンペア100000000
 */
 
-func selfChange(hand []*card, cards []*card) ([]*card, []*card, int) {
+func selfChange(hand []*card, cards []*card) ([]*card, []*card) {
 	var memory = make([]bool, 5)	// handがポインタ型だったらこれをやっても無駄.newhandが書き換えられたらhandも書き換えられる.
 	print("入れ替えたいカードの番号を選んで下さい, 0を押したら交換終了, 6を押したら変更をもとに戻します. > ")
 	
@@ -190,10 +193,21 @@ func selfChange(hand []*card, cards []*card) ([]*card, []*card, int) {
 									/*"golang.org/x/exp/slices"パッケージを使う場合
 									hand = slices.Delete(hand, n-1, n)
 									*/
-									hand = append(hand[:i], hand[i:]...)//!!!! ...が重要									
+									//hand = append(hand[:i], hand[i:]...)
+									//!!!! ...が重要									
+									//これをやると	handの長さと添字がおかしくなる
+
+									//入れ替えるカードの数字を0にしてソートする.
+									/*
+									for i := 0; i < len(hand); i++{
+										if hand[i].number != 0 {
+											hand = append(hand[i:], cards[:i])
+										}
+									}
+									*/
 								}
 							}
-							return hand, cards, 5-len(hand)
+							return hand, cards
 						case "no","n":
 							println("続けます.")
 					}

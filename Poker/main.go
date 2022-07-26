@@ -16,6 +16,7 @@ var suit0, suit1, suit2, suit3 string = "♠", "♣", "◆", "♥"
 var suits = &([]*string{&suit0, &suit1, &suit2, &suit3})	//煩雑だがcard型の定義を満たすためにsuit0~3はポインタ型にする
 
 var cards = make([]*card, 0, 53)
+var hand = make([]*card, 0, 10)
 
 
 func main() {
@@ -31,7 +32,7 @@ func main() {
 
 var n int = 5
 for i := 0; i < 3; i++ {
-	hand, cards := drawHand(cards, n)
+	hand, cards = drawHand(cards, hand, n)
 
 	hand, ok_royalst, countRoyalst := outputHand(hand)
 
