@@ -65,7 +65,7 @@ func (a *all) outputHand() (bool, int) {
 
 func (a *all) judgeHand(ok_RylSt bool) (int, int, int) {
 
-	var check = make([]int, 14) //13にしてたせいでc.number == 13のときバグ発生
+	var check = make([]int, 14) //c.number == 13のときのために注意して14にする.
 
 	for _, c := range a.hand {
 		check[c.number]++
@@ -98,7 +98,7 @@ func (a *all) judgeHand(ok_RylSt bool) (int, int, int) {
 	var ok_Fl, ok_St = true, true
 	cntFl, cntSt := 1, 1
 	for i := 0; i+1 < 5; i++ {
-		if *(a.hand[i].suit) != *(a.hand[i+1].suit) { //hand[i]もポインタだがhand[i]経由でsuit *stringにアクセスしている.
+		if *(a.hand[i].suit) != *(a.hand[i+1].suit) { //suit *string
 			ok_Fl = false
 		} else {
 			cntFl++
@@ -157,7 +157,7 @@ func outputRole(bit int, roles *[]string) {
 */
 
 func (a *all) selfChange() int {
-	var memory = make([]bool, 5) // handがポインタ型だったらこれをやっても無駄.newhandが書き換えられたらhandも書き換えられる.
+	var memory = make([]bool, 5)
 
 	for {
 		print("入れ替えたいカードの番号を選んで下さい, 0を押したら交換終了, 6を押したら変更をもとに戻します. > ")
