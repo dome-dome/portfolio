@@ -28,10 +28,10 @@ func (a *all) set() {
 
 var last = 0
 
-//!!!!var cnt = 0
+var cnt = 0
 func (a *all) start() {
 	for i := 0; i < 3; i++ {
-		cnt := i //!!!!
+
 		a.drawHand(cnt, last)
 
 		ok_RylSt, cntRylSt := a.outputHand()
@@ -52,7 +52,7 @@ func (a *all) start() {
 
 		last = a.selfChange()
 
-		//!!!!cnt++
+		cnt++
 
 		//3回目の交換の結果
 		if i == 2 {
