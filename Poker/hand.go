@@ -37,7 +37,7 @@ func (a *all) outputHand() (bool, int) {
 		switch c.number {
 		case 1:
 			cntRylSt++
-			fmt.Printf("%d. %s A\n", i+1, *(c.suit)) ////!!!!!!!
+			fmt.Printf("%d. %s A\n", i+1, *(c.suit)) //c.suitは*string型なのでデリファレンスする.
 		case 10:
 			cntRylSt++
 			fmt.Printf("%d. %s 10\n", i+1, *(c.suit))
