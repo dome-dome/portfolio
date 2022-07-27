@@ -1,6 +1,4 @@
 package main
-//sliceはポインタにすると操作が面倒だと思う
-//だからユーザ定義型の変数をポインタにしたものにスライスを入れてるのでは
 
 import (
 	"fmt"
@@ -10,81 +8,70 @@ import (
 	//"golang.org/x/exp/slices"
 )
 
-type card struct {
-	suit   *string
-	number int
-}
-
-func drawHand(cards *[]*card, hand *[]*card) (*[]*card, *[]*card) {
+func (a *all) drawHand(cnt int, last int) {
 	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(*cards), func(i, j int) { (*cards)[i], (*cards)[j] = (*cards)[j], (*cards)[i] })
+	rand.Shuffle(len(a.cards), func(i, j int) { a.cards[i], a.cards[j] = a.cards[j], a.cards[i] })
 
-	for i := 0; i < len(*hand); i++ {
-		//println(hand[i].number) ///////test
-		if (*hand)[i].number != 0 {
-			*hand = append((*hand)[i:], (*cards)[:i]...) //...必要っぽい
-			(*cards) = (*cards)[i:]
-		}
+	if cnt == 0 {
+		a.hand = a.cards[:5]
+		a.cards = a.cards[5:]
+	} else if last > 0 {
+		a.hand = append(a.hand[last:], a.cards[:last]...)
+		a.cards = a.cards[last:]
 	}
-
-	return hand, cards
 }
 
 //S
 //シード値の設定
 //山札のシャッフル
-//手札をn枚引き, 山札を決める
+//手札を引き, 山札を決める
 
-func outputHand(hand *[]*card, ok_royalst *bool, countRoyalst *int) (*[]*card, *bool, *int) {
+func (a *all) outputHand() (bool, int) {
+	ok_RylSt := true
+	var cntRylSt int
+
 	//ユーザ定義型のスライスなのでslices.Sort(hand)はできない
-	sort.Slice((*hand), func(i, j int) bool { return (*hand)[i].number < (*hand)[j].number })
+	sort.Slice(a.hand, func(i, j int) bool { return a.hand[i].number < a.hand[j].number })
 
-	
-	for i, c := range (*hand) {
+	for i, c := range a.hand {
 		switch c.number {
 		case 1:
-			*countRoyalst++
+			cntRylSt++
 			fmt.Printf("%d. %s A\n", i+1, *(c.suit)) ////!!!!!!!
 		case 10:
-			*countRoyalst++
+			cntRylSt++
 			fmt.Printf("%d. %s 10\n", i+1, *(c.suit))
 		case 11:
-			*countRoyalst++
+			cntRylSt++
 			fmt.Printf("%d. %s J\n", i+1, *(c.suit))
 		case 12:
-			*countRoyalst++
+			cntRylSt++
 			fmt.Printf("%d. %s Q\n", i+1, *(c.suit))
 		case 13:
-			*countRoyalst++
+			cntRylSt++
 			fmt.Printf("%d. %s K\n", i+1, *(c.suit))
 		default:
 			fmt.Printf("%d. %s %d\n", i+1, *(c.suit), c.number)
-			*ok_royalst = false
+			ok_RylSt = false
 		}
 	}
 
-	return hand, ok_royalst, countRoyalst
+	return ok_RylSt, cntRylSt
 }
 
 //A
 //手札のソート
 //手札の出力(特別な数字は柄で出力)
 
-func judgeHand(hand *[]*card, ok_royalst *bool) (int, int, int) {
+func (a *all) judgeHand(ok_RylSt bool) (int, int, int) {
 
-	var check = make([]int, 14) //!!!!!!!!!!! 13にしてたせいでc.number == 13のときバグ発生
+	var check = make([]int, 14) //13にしてたせいでc.number == 13のときバグ発生
 
-	for _, c := range *hand {
-		check[c.number]++ //????????????アクセスしてint型を表示しているのになんの問題？
+	for _, c := range a.hand {
+		check[c.number]++
 	}
 
-	//sort.Ints(check)だけで添字を逆順にしても良い
 	sort.Sort(sort.Reverse(sort.IntSlice(check)))
-	/* sortパッケージを使わないでcheckを逆順ソート
-	for left, right := 0, len(check)-1; left < right; left, right = left+1, right-1 {
-		check[left], check[right] = check[right], check[left]
-	}
-	*/
 
 	max, nmax := check[0], check[1]
 	var bit int
@@ -108,42 +95,41 @@ func judgeHand(hand *[]*card, ok_royalst *bool) (int, int, int) {
 
 	}
 
-	var ok_flash, ok_straight = true, true
-	var countFla, countStr int
+	var ok_Fl, ok_St = true, true
+	cntFl, cntSt := 1, 1
 	for i := 0; i+1 < 5; i++ {
-		if *((*hand)[i].suit) != *((*hand)[i+1].suit) { //hand[i]もポインタだがhand[i]経由でsuit *stringにアクセスしている.
-			ok_flash = false
+		if *(a.hand[i].suit) != *(a.hand[i+1].suit) { //hand[i]もポインタだがhand[i]経由でsuit *stringにアクセスしている.
+			ok_Fl = false
 		} else {
-			countFla++
+			cntFl++
 		}
 
-		if (*hand)[i].number != (*hand)[i+1].number {
-			ok_straight = false
+		if a.hand[i].number != a.hand[i+1].number {
+			ok_St = false
 		} else {
-			countStr++
+			cntSt++
 		}
 	}
 
 	switch {
-	case ok_flash:
+	case ok_Fl:
 		bit |= (1 << 4) //フラッシュ
 
-	case ok_straight:
+	case ok_St:
 		bit |= (1 << 5) //ストレート
 
-	case ok_flash && ok_straight:
+	case ok_Fl && ok_St:
 		bit |= (1 << 1) //ストフラ
 
-	case ok_flash && *ok_royalst:
+	case ok_Fl && *&ok_RylSt:
 		bit |= (1 << 0) //ロイヤルストフラ
 	}
 
-	return bit, countFla, countStr
+	return bit, cntFl, cntSt
 }
 
 //B
-//mapを利用した役の判定と出力	//sliceの方が良い
-//役によってコインのオッズも変わる
+//sliceを利用した役の判定と出力
 
 func outputRole(bit int, roles *[]string) {
 	for i := 0; i < 9; i++ {
@@ -170,7 +156,7 @@ func outputRole(bit int, roles *[]string) {
 9.ワンペア100000000
 */
 
-func selfChange(hand *[]*card, cards *[]*card) (*[]*card, *[]*card) {
+func (a *all) selfChange() int {
 	var memory = make([]bool, 5) // handがポインタ型だったらこれをやっても無駄.newhandが書き換えられたらhandも書き換えられる.
 
 	for {
@@ -179,10 +165,10 @@ func selfChange(hand *[]*card, cards *[]*card) (*[]*card, *[]*card) {
 		var n int
 		fmt.Scan(&n)
 		if n < 0 || n > 6 {
-		for n < 0 || n > 6 {
+			for n < 0 || n > 6 {
 				println("0~6の番号を入力して下さい.")
 				fmt.Scan(&n)
-		}
+			}
 		}
 
 		switch {
@@ -199,25 +185,20 @@ func selfChange(hand *[]*card, cards *[]*card) (*[]*card, *[]*card) {
 
 				switch witch {
 				case "yes", "y":
+					var last int
 					for i, ok := range memory {
 						if ok {
-							*cards = append(*cards, (*hand)[i])
-
-							/*"golang.org/x/exp/slices"パッケージを使う場合
-							hand = slices.Delete(hand, n-1, n)
-							*/
-							//hand = append(hand[:i], hand[i:]...)
-							//!!!! ...が重要
-							//これをやると	handの長さと添字がおかしくなる
+							a.cards = append(a.cards, a.hand[i])
 
 							//入れ替えるカードの数字を0にしてソートする.
-							(*hand)[i] = zerocard
+							a.hand[i] = zerocard
+							last++
 						}
 					}
 
 					println("-------交換を終わります-------")
-					sort.Slice(*hand, func(i, j int) bool { return (*hand)[i].number < (*hand)[j].number })
-					return hand, cards
+					sort.Slice(a.hand, func(i, j int) bool { return a.hand[i].number < a.hand[j].number })
+					return last
 
 				case "no", "n":
 					println("続けます.")
@@ -255,3 +236,9 @@ func selfChange(hand *[]*card, cards *[]*card) (*[]*card, *[]*card) {
 //C
 //self change
 //手札の交換.山札へ戻しSへ
+
+var suit0 = "♠"
+var zerocard = &(card{
+	suit:   &suit0,
+	number: 0,
+})
