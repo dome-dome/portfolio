@@ -6,9 +6,7 @@ type quiz struct {
 	ans     int
 }
 
-type qslice struct {
-	qs []*quiz
-}
+type qslice []*quiz
 
 func question01() *quiz {
 	return &quiz{
@@ -27,11 +25,9 @@ func question02() *quiz {
 }
 
 func main() {
-	qslice := &qslice{
-		qs: []*quiz{
+		qs := qslice{
 			question01(), question02(),
-		},
-	}
+		}
 
-	qslice.start()
+	qs.start()
 }

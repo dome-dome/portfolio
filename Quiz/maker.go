@@ -2,16 +2,16 @@ package main
 
 import "fmt"
 
-func (qslice *qslice) start() {
+func (qs *qslice) start() {
 	for {
 		//0-index
-		num := qslice.inputQuizNumber()
+		num := qs.inputQuizNumber()
 
 		if num == -1 {
 			return
 		}
 
-		Q := qslice.qs[num]
+		Q := (*qs)[num]
 		fmt.Printf("%d. %s\n", num+1, Q.name)
 		for i, c := range Q.choices {
 			fmt.Printf("%d. %s\n", i+1, c)
@@ -49,20 +49,20 @@ func (Q *quiz) inputChoice() int {
 	return choice - 1 //0-index
 }
 
-func (qslice *qslice) inputQuizNumber() int {
+func (qs *qslice) inputQuizNumber() int {
 
-	for i, Q := range qslice.qs {
+	for i, Q := range *qs {
 		fmt.Printf("クイズ %d: %s\n", i+1, Q.name)
 	}
-	fmt.Printf("%d: 終了する\n", len(qslice.qs)+1)
+	fmt.Printf("%d: 終了する\n", len(*qs)+1)
 
 	var num int
-	for num < 1 || num > len(qslice.qs)+1 {
+	for num < 1 || num > len(*qs)+1 {
 		print("番号を入力して下さい > ")
 		fmt.Scan(&num)
 	}
 
-	if num == len(qslice.qs)+1 {
+	if num == len(*qs)+1 {
 		println("終了")
 		return -1
 	}
