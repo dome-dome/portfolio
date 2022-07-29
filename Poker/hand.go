@@ -121,7 +121,7 @@ func (a *all) judgeHand(ok_RylSt bool) (int, int, int) {
 	case ok_Fl && ok_St:
 		bit |= (1 << 1) //ストフラ
 
-	case ok_Fl && ok_RylSt:
+	case ok_Fl && ok_RylSt://
 		bit |= (1 << 0) //ロイヤルストフラ
 	}
 
