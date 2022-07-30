@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"sort"
 	"time"
-	
+
 	//"golang.org/x/exp/slices"
 )
 
@@ -132,7 +132,7 @@ func (a *all) judgeHand(ok_RylSt bool) (int, int, int) {
 //B
 //sliceを利用した役の判定と出力
 
-func outputRole(bit int, roles *[]string) {
+func outputRole(bit int) {
 	for i := 0; i < 9; i++ {
 		if bit&(1<<i) == (1 << i) { //if bit & (1<<i) == 1	としてはいけない. 1 = (1<<0) だから.
 			println("現在の役: ", (*roles)[i])
