@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"sort"
 	"time"
+	
 	//"golang.org/x/exp/slices"
 )
 
@@ -237,7 +238,6 @@ func (a *all) selfChange() int {
 //self change
 //手札の交換.山札へ戻しSへ
 
-var suit0 = "♠"
 var zerocard = &(card{
 	suit:   &suit0,
 	number: 0,
