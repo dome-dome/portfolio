@@ -1,9 +1,11 @@
 package main
 
+//パッケージ変数にすることで他のファイル内でも使用可能になる.
+var suit0, suit1, suit2, suit3 string = "♠", "♣", "◆", "♥"
+
 func main() {
 	cards := make([]*card, 0, 53)
 	hand := make([]*card, 0, 10)
-	suit0, suit1, suit2, suit3 := "♠", "♣", "◆", "♥"
 
 	all := &(all{
 		cards: cards,
