@@ -38,7 +38,7 @@ func (a *all) start() {
 
 		bit, cntFl, cntSt := a.judgeHand(ok_RylSt)
 
-		outputRole(bit, roles)
+		outputRole(bit)
 
 		switch {
 		case cntRylSt == 4 && cntFl == 4:
@@ -62,11 +62,12 @@ func (a *all) start() {
 
 			bit, cntFl, cntSt = a.judgeHand(ok_RylSt)
 
-			outputRole(bit, roles)
+			outputRole(bit)
 		}
 	}
 }
 
+//パッケージ変数なのでoutputRole()内で引数として渡さなくても使える
 var roles = &([]string{
 	"No.1: ロイヤルストレートフラッシュ",
 	"No.2: ストレートフラッシュ",
