@@ -36,15 +36,13 @@ func (a *all) start() {
 
 		ok_RylSt, cntRylSt := a.outputHand()
 
-		bit, cntFl, cntSt := a.judgeHand(ok_RylSt)
+		bit, cntFl := a.judgeHand(ok_RylSt)
 
 		outputRole(bit)
 
 		switch {
 		case cntRylSt == 4 && cntFl == 4:
 			println("1枚交換すればロイヤルストレートフラッシュになるかも？")
-		case cntSt == 4:
-			println("1枚交換すればストレートになるかも？")
 		case cntFl == 4:
 			println("1枚交換すればフラッシュになるかも？")
 		}
@@ -60,14 +58,14 @@ func (a *all) start() {
 
 			ok_RylSt, cntRylSt = a.outputHand()
 
-			bit, cntFl, cntSt = a.judgeHand(ok_RylSt)
+			bit, cntFl = a.judgeHand(ok_RylSt)
 
 			outputRole(bit)
 		}
 	}
 }
 
-//パッケージ変数なのでoutputRole()内で引数として渡さなくても使える
+// パッケージ変数なのでoutputRole()内で引数として渡さなくても使える
 var roles = &([]string{
 	"No.1: ロイヤルストレートフラッシュ",
 	"No.2: ストレートフラッシュ",

@@ -5,14 +5,19 @@ import (
 	"math/rand"
 	"sort"
 	"time"
-
 	//"golang.org/x/exp/slices"
 )
+
+//drawHand()
+//シード値の設定
+//山札のシャッフル
+//手札を引き, 山札を決める
 
 func (a *all) drawHand(cnt int, last int) {
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(a.cards), func(i, j int) { a.cards[i], a.cards[j] = a.cards[j], a.cards[i] })
 
+	//初回は必ず5枚引く
 	if cnt == 0 {
 		a.hand = a.cards[:5]
 		a.cards = a.cards[5:]
@@ -22,10 +27,9 @@ func (a *all) drawHand(cnt int, last int) {
 	}
 }
 
-//S
-//シード値の設定
-//山札のシャッフル
-//手札を引き, 山札を決める
+//outputHand()
+//手札のソート
+//手札の出力(特別な数字は柄で出力)
 
 func (a *all) outputHand() (bool, int) {
 	ok_RylSt := true
@@ -60,11 +64,10 @@ func (a *all) outputHand() (bool, int) {
 	return ok_RylSt, cntRylSt
 }
 
-//A
-//手札のソート
-//手札の出力(特別な数字は柄で出力)
+//judgeHand()
+//check := []int を利用した役の判定と出力
 
-func (a *all) judgeHand(ok_RylSt bool) (int, int, int) {
+func (a *all) judgeHand(ok_RylSt bool) (int, int) {
 
 	var check = make([]int, 14) //c.number == 13のときのために注意して14にする.
 
@@ -72,6 +75,7 @@ func (a *all) judgeHand(ok_RylSt bool) (int, int, int) {
 		check[c.number]++
 	}
 
+	//同じ数字のカードが何枚ずつあるか集計する
 	sort.Sort(sort.Reverse(sort.IntSlice(check)))
 
 	max, nmax := check[0], check[1]
@@ -97,7 +101,7 @@ func (a *all) judgeHand(ok_RylSt bool) (int, int, int) {
 	}
 
 	var ok_Fl, ok_St = true, true
-	cntFl, cntSt := 1, 1
+	cntFl := 1
 	for i := 0; i+1 < 5; i++ {
 		if *(a.hand[i].suit) != *(a.hand[i+1].suit) { //suit *string
 			ok_Fl = false
@@ -105,10 +109,8 @@ func (a *all) judgeHand(ok_RylSt bool) (int, int, int) {
 			cntFl++
 		}
 
-		if a.hand[i].number != a.hand[i+1].number {
+		if a.hand[i].number != (a.hand[i+1].number)+1 {
 			ok_St = false
-		} else {
-			cntSt++
 		}
 	}
 
@@ -126,11 +128,8 @@ func (a *all) judgeHand(ok_RylSt bool) (int, int, int) {
 		bit |= (1 << 0) //ロイヤルストフラ
 	}
 
-	return bit, cntFl, cntSt
+	return bit, cntFl
 }
-
-//B
-//sliceを利用した役の判定と出力
 
 func outputRole(bit int) {
 	for i := 0; i < 9; i++ {
@@ -180,11 +179,11 @@ func (a *all) selfChange() int {
 		case n == 0:
 		LOOP1:
 			for {
-				var witch string
+				var which string
 				fmt.Printf("交換を終わりますか？ [yes/no (y/n)] > ")
-				fmt.Scan(&witch)
+				fmt.Scan(&which)
 
-				switch witch {
+				switch which {
 				case "yes", "y":
 					var last int
 					for i, ok := range memory {
@@ -213,11 +212,11 @@ func (a *all) selfChange() int {
 		case n == 6:
 		LOOP2:
 			for {
-				var witch string
+				var which string
 				fmt.Printf("交換をもとに戻しますか？ [yes/no (y/n)] > ")
-				fmt.Scan(&witch)
+				fmt.Scan(&which)
 
-				switch witch {
+				switch which {
 				case "yes", "y":
 					memory = make([]bool, 5)
 					println("-------戻しました-------")
